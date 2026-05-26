@@ -342,6 +342,40 @@ const app = {
     this.els.btnShoppingList.disabled = false;
   },
 
+  // ---------- 通用 Vision API 调用 ----------
+  // 自动适配：Vercel → 代理格式；EdgeOne → 直连Qwen
+  async callVisionAPI(imageBase64, prompt) {
+    const cfg = API_CONFIG.vision;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
+    let url, headers, body;
+    if (cfg.isProxy) {
+      url = cfg.endpoint;
+      headers = { 'Content-Type': 'application/json' };
+      body = JSON.stringify({ image: imageBase64, prompt });
+    } else {
+      url = cfg.endpoint;
+      headers = {
+        'Authorization': `Bearer ${cfg.apiKey}`,
+        'Content-Type': 'application/json',
+      };
+      body = JSON.stringify({
+        model: cfg.model,
+        input: { messages: [{ role: 'user', content: [{ image: imageBase64 }, { text: prompt }] }] },
+        parameters: { temperature: 0.4 },
+      });
+    }
+
+    try {
+      const res = await fetch(url, { method: 'POST', headers, body, signal: controller.signal });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      return await res.json();
+    } finally {
+      clearTimeout(timeout);
+    }
+  },
+
   // ---------- 通义千问 VL API ----------
   async callQwenAPI(imageDataUrl) {
     const loadingText = document.querySelector('.loading-text');
@@ -363,21 +397,8 @@ const app = {
   "recipes": [{"id": "r1", "name": "西红柿炒鸡蛋", "emoji": "🍳", "time": "10分钟", "difficulty": "简单", "calories": "180千卡", "tags": ["快手菜"], "match": ["鸡蛋"], "missing": ["西红柿"], "steps": ["打散鸡蛋加盐搅匀", "热油倒入蛋液炒至凝固盛出", "翻炒西红柿出汁后倒回鸡蛋", "加盐调味出锅"]}]
 }`;
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
-
-    try {
-      const res = await fetch(API_CONFIG.vision.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: compressed, prompt }),
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`API ${res.status}`);
-      return this.parseAPIResponse(await res.json());
-    } finally {
-      clearTimeout(timeout);
-    }
+    const data = await this.callVisionAPI(compressed, prompt);
+    return this.parseAPIResponse(data);
   },
 
   parseAPIResponse(data) {
@@ -426,22 +447,7 @@ const app = {
   "advice": "碳水摄入偏高，建议米饭减半或替换为杂粮。"
 }`;
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
-
-    let data;
-    try {
-      const res = await fetch(API_CONFIG.vision.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: compressed, prompt }),
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`API ${res.status}`);
-      data = await res.json();
-    } finally {
-      clearTimeout(timeout);
-    }
+    const data = await this.callVisionAPI(compressed, prompt);
     const content = data?.output?.choices?.[0]?.message?.content;
     const text = Array.isArray(content)
       ? content.filter(c => c.text).map(c => c.text).join('')
