@@ -349,7 +349,7 @@ const app = {
     if (loadingText) loadingText.textContent = '正在识别食材…';
     if (loadingSub) loadingSub.textContent = '分析搭配方案，生成推荐菜谱';
 
-    const compressed = await this.compressImage(imageDataUrl, 1024);
+    const compressed = await this.compressImage(imageDataUrl, 768);
     const prompt = `你是一个专业的中餐厨师和营养师。请先仔细识别图片中实际可见的食材，然后基于这些食材推荐菜谱。
 
 重要：只列出图中确实存在的食材，不要编造不存在的食材。缺少的调料可以列入missing。
@@ -363,13 +363,21 @@ const app = {
   "recipes": [{"id": "r1", "name": "西红柿炒鸡蛋", "emoji": "🍳", "time": "10分钟", "difficulty": "简单", "calories": "180千卡", "tags": ["快手菜"], "match": ["鸡蛋"], "missing": ["西红柿"], "steps": ["打散鸡蛋加盐搅匀", "热油倒入蛋液炒至凝固盛出", "翻炒西红柿出汁后倒回鸡蛋", "加盐调味出锅"]}]
 }`;
 
-    const res = await fetch(API_CONFIG.vision.endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: compressed, prompt }),
-    });
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    return this.parseAPIResponse(await res.json());
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
+    try {
+      const res = await fetch(API_CONFIG.vision.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: compressed, prompt }),
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      return this.parseAPIResponse(await res.json());
+    } finally {
+      clearTimeout(timeout);
+    }
   },
 
   parseAPIResponse(data) {
@@ -394,7 +402,7 @@ const app = {
         else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } }
         canvas.width = width; canvas.height = height;
         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.85));
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
       img.src = dataUrl;
     });
@@ -402,7 +410,7 @@ const app = {
 
   // ---------- 卡路里 API ----------
   async callQwenCalorieAPI(imageDataUrl) {
-    const compressed = await this.compressImage(imageDataUrl, 1024);
+    const compressed = await this.compressImage(imageDataUrl, 768);
     const prompt = `你是一个专业的营养师。请识别这张照片中的所有食物，并为每种食物估算营养数据。
 
 照片可能包含：一道或多道菜品、一顿正餐、外卖、沙拉、火锅、零食等。请逐一识别并估算。
@@ -418,13 +426,22 @@ const app = {
   "advice": "碳水摄入偏高，建议米饭减半或替换为杂粮。"
 }`;
 
-    const res = await fetch(API_CONFIG.vision.endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: compressed, prompt }),
-    });
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    const data = await res.json();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
+    let data;
+    try {
+      const res = await fetch(API_CONFIG.vision.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: compressed, prompt }),
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      data = await res.json();
+    } finally {
+      clearTimeout(timeout);
+    }
     const content = data?.output?.choices?.[0]?.message?.content;
     const text = Array.isArray(content)
       ? content.filter(c => c.text).map(c => c.text).join('')
