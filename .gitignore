@@ -3,3 +3,6 @@
 Thumbs.db
 *.log
 test1.png
+node_modules/
+package.json
+package-lock.json
