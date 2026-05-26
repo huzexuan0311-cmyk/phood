@@ -1,6 +1,56 @@
 // ========== 饭来 — Claude Edition ==========
 // Design: Anthropic — Warm · Human · Minimal
 
+const FOOD_WHEEL = [
+  // 粉面
+  { name: '麻辣烫', emoji: '🥘' }, { name: '兰州拉面', emoji: '🍜' }, { name: '螺蛳粉', emoji: '🍲' },
+  { name: '过桥米线', emoji: '🍜' }, { name: '牛肉面', emoji: '🍝' }, { name: '炸酱面', emoji: '🍜' },
+  { name: '重庆小面', emoji: '🌶️' }, { name: '热干面', emoji: '🍜' }, { name: '酸辣粉', emoji: '🍲' },
+  { name: '担担面', emoji: '🍝' }, { name: '刀削面', emoji: '🍜' }, { name: '冷面', emoji: '🧊' },
+  { name: '肉酱意面', emoji: '🍝' }, { name: '炒米粉', emoji: '🍜' }, { name: '粿条', emoji: '🍲' },
+  { name: '车仔面', emoji: '🍜' }, { name: '乌冬面', emoji: '🍥' },
+  // 米饭
+  { name: '煲仔饭', emoji: '🍚' }, { name: '盖浇饭', emoji: '🍛' }, { name: '蛋炒饭', emoji: '🍳' },
+  { name: '烤肉拌饭', emoji: '🥩' }, { name: '黄焖鸡米饭', emoji: '🍗' }, { name: '石锅拌饭', emoji: '🥘' },
+  { name: '卤肉饭', emoji: '🍚' }, { name: '咖喱饭', emoji: '🍛' }, { name: '猪脚饭', emoji: '🐷' },
+  { name: '烧腊饭', emoji: '🍖' }, { name: '扬州炒饭', emoji: '🍳' }, { name: '牛丼', emoji: '🥩' },
+  { name: '鳗鱼饭', emoji: '🐟' }, { name: '叉烧饭', emoji: '🍖' },
+  // 硬菜/炒菜
+  { name: '酸菜鱼', emoji: '🐟' }, { name: '麻辣香锅', emoji: '🌶️' }, { name: '烤鱼', emoji: '🐠' },
+  { name: '水煮肉片', emoji: '🥩' }, { name: '宫保鸡丁', emoji: '🥜' }, { name: '红烧排骨', emoji: '🦴' },
+  { name: '回锅肉', emoji: '🥓' }, { name: '糖醋里脊', emoji: '🍖' }, { name: '鱼香肉丝', emoji: '🥕' },
+  { name: '红烧肉', emoji: '🥩' }, { name: '地三鲜', emoji: '🍆' }, { name: '麻婆豆腐', emoji: '🧈' },
+  { name: '京酱肉丝', emoji: '🥒' }, { name: '干煸四季豆', emoji: '🫛' }, { name: '辣子鸡', emoji: '🌶️' },
+  { name: '葱爆羊肉', emoji: '🐑' }, { name: '东坡肉', emoji: '🍖' }, { name: '番茄牛腩', emoji: '🍅' },
+  // 火锅/砂锅/汤
+  { name: '小火锅', emoji: '🫕' }, { name: '串串香', emoji: '🍢' }, { name: '砂锅粥', emoji: '🥣' },
+  { name: '酸汤肥牛', emoji: '🐮' }, { name: '毛血旺', emoji: '🩸' }, { name: '羊蝎子', emoji: '🐑' },
+  { name: '寿喜锅', emoji: '🫕' }, { name: '部队锅', emoji: '🪖' }, { name: '疙瘩汤', emoji: '🥣' },
+  // 小吃/点心
+  { name: '饺子', emoji: '🥟' }, { name: '馄饨', emoji: '🥣' }, { name: '煎饼果子', emoji: '🥞' },
+  { name: '生煎包', emoji: '🥟' }, { name: '小笼包', emoji: '🧆' }, { name: '肉夹馍', emoji: '🥙' },
+  { name: '煎饼', emoji: '🫓' }, { name: '葱油饼', emoji: '🧅' }, { name: '鸡蛋灌饼', emoji: '🥚' },
+  { name: '烤冷面', emoji: '🧊' }, { name: '关东煮', emoji: '🍢' }, { name: '肠粉', emoji: '🫔' },
+  { name: '凉皮', emoji: '🥒' }, { name: '春卷', emoji: '🫔' }, { name: '烧卖', emoji: '🥟' },
+  // 快餐/西式
+  { name: '炸鸡汉堡', emoji: '🍔' }, { name: '披萨', emoji: '🍕' }, { name: '三明治', emoji: '🥪' },
+  { name: '热狗', emoji: '🌭' }, { name: '薯条炸鸡', emoji: '🍗' }, { name: '塔可', emoji: '🌮' },
+  { name: '卷饼', emoji: '🌯' }, { name: '芝士通心粉', emoji: '🧀' },
+  // 日韩
+  { name: '寿司', emoji: '🍣' }, { name: '拉面', emoji: '🍥' }, { name: '天妇罗', emoji: '🍤' },
+  { name: '炸猪排', emoji: '🐷' }, { name: '韩式炸鸡', emoji: '🍗' }, { name: '辣炒年糕', emoji: '🫓' },
+  { name: '大酱汤', emoji: '🫕' }, { name: '紫菜包饭', emoji: '🍙' },
+  // 东南亚
+  { name: '越南河粉', emoji: '🍜' }, { name: '冬阴功', emoji: '🦐' }, { name: '泰式炒河粉', emoji: '🍝' },
+  { name: '海南鸡饭', emoji: '🐔' }, { name: '肉骨茶', emoji: '🍖' }, { name: '椰浆饭', emoji: '🥥' },
+  // 轻食/健康
+  { name: '轻食沙拉', emoji: '🥗' }, { name: '波奇饭', emoji: '🐟' }, { name: '藜麦碗', emoji: '🥬' },
+  { name: '杂粮饭团', emoji: '🍙' }, { name: '酸奶碗', emoji: '🥣' },
+  // 一日三餐
+  { name: '豆浆油条', emoji: '🥖' }, { name: '豆腐脑', emoji: '🧈' }, { name: '粽子', emoji: '🫔' },
+  { name: '沙县小吃', emoji: '🥟' },
+];
+
 const app = {
   currentPage: 'home',
   currentMode: 'recipe',
@@ -8,6 +58,7 @@ const app = {
   currentCalorieData: null,
   selectedRecipes: new Set(),
   activePref: 'all',
+  isSlotRolling: false,
 
   init() {
     this.bindElements();
@@ -56,6 +107,13 @@ const app = {
       calorieItems: document.getElementById('calorieItems'),
       calorieAdvice: document.getElementById('calorieAdvice'),
       btnCalorieBack: document.getElementById('btnCalorieBack'),
+
+      slotMachine: document.getElementById('slotMachine'),
+      slotDisplay: document.getElementById('slotDisplay'),
+      slotEmoji: document.getElementById('slotEmoji'),
+      slotName: document.getElementById('slotName'),
+      btnStartSlot: document.getElementById('btnStartSlot'),
+      demos: document.querySelector('.demo-section'),
     };
   },
 
@@ -94,6 +152,8 @@ const app = {
     });
     this.els.btnCalorieBack.addEventListener('click', () => this.renderPage('home'));
 
+    this.els.btnStartSlot.addEventListener('click', () => this.startSlot());
+
     this.els.tweaksToggle.addEventListener('click', () => this.toggleTweaks());
     document.addEventListener('click', (e) => {
       if (!e.target.closest('#tweaksPanel') && !e.target.closest('#tweaksToggle')) {
@@ -127,8 +187,63 @@ const app = {
     tabs.forEach((t) => t.classList.remove('active'));
     const activeTab = this.els.modeTabs.querySelector(`[data-mode="${mode}"]`);
     if (activeTab) activeTab.classList.add('active');
-    // Update button text
-    this.els.btnAnalyze.textContent = mode === 'calorie' ? '识别卡路里' : '识别食材';
+
+    const isSlot = mode === 'slot';
+    this.els.uploadZone.classList.toggle('hidden', isSlot);
+    this.els.btnAnalyze.classList.toggle('hidden', isSlot);
+    this.els.demos.classList.toggle('hidden', isSlot);
+    this.els.slotMachine.classList.toggle('hidden', !isSlot);
+
+    if (mode === 'calorie') this.els.btnAnalyze.textContent = '识别卡路里';
+    else this.els.btnAnalyze.textContent = '识别食材';
+  },
+
+  startSlot() {
+    if (this.isSlotRolling) return;
+    this.isSlotRolling = true;
+    const btn = this.els.btnStartSlot;
+    btn.disabled = true;
+    btn.textContent = '🎰 抽取中…';
+
+    // Pick the winner first
+    const winner = FOOD_WHEEL[Math.floor(Math.random() * FOOD_WHEEL.length)];
+
+    // Build a sequence: random items then the winner at the end
+    const totalSteps = 18 + Math.floor(Math.random() * 10);
+    const sequence = [];
+    for (let i = 0; i < totalSteps - 1; i++) {
+      let item;
+      do { item = FOOD_WHEEL[Math.floor(Math.random() * FOOD_WHEEL.length)]; } while (item === winner);
+      sequence.push(item);
+    }
+    sequence.push(winner);
+
+    // Spin with progressive deceleration
+    let step = 0;
+    const spin = () => {
+      const item = sequence[step];
+      this.els.slotEmoji.textContent = item.emoji;
+      this.els.slotName.textContent = item.name;
+      this.els.slotDisplay.classList.add('slot-spin');
+      step++;
+
+      if (step >= sequence.length) {
+        // Done — reveal
+        this.els.slotDisplay.classList.remove('slot-spin');
+        this.els.slotDisplay.classList.add('slot-win');
+        btn.textContent = '🎰 再抽一次';
+        btn.disabled = false;
+        this.isSlotRolling = false;
+        setTimeout(() => this.els.slotDisplay.classList.remove('slot-win'), 600);
+        return;
+      }
+
+      // Decelerating: start fast, get slower
+      const progress = step / sequence.length;
+      const delay = 50 + progress * progress * 350;
+      setTimeout(spin, delay);
+    };
+    spin();
   },
 
   handleFileSelect(e) {

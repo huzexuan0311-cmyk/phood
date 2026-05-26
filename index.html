@@ -50,6 +50,19 @@
           <button class="mode-tab" data-mode="calorie">
             <span class="mode-icon">🔥</span> 卡路里识别
           </button>
+          <button class="mode-tab" data-mode="slot">
+            <span class="mode-icon">🎰</span> 今天吃啥
+          </button>
+        </div>
+
+        <!-- 老虎机：随机抽吃什么 -->
+        <div class="slot-machine hidden" id="slotMachine">
+          <div class="slot-display" id="slotDisplay">
+            <div class="slot-emoji" id="slotEmoji">🎰</div>
+            <div class="slot-name" id="slotName">今天吃啥？</div>
+          </div>
+          <button class="btn btn-primary slot-btn" id="btnStartSlot">🎰 开始抽取</button>
+          <p class="slot-hint">让命运决定今天的美味</p>
         </div>
 
         <div class="upload-zone" id="uploadZone">
