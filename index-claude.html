@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>饭来 — 拍一拍，饭就来</title>
+  <link rel="stylesheet" href="src/style-claude.css">
+</head>
+<body>
+  <div id="app" class="phone-frame">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+      <span>9:41</span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <!-- 导航 -->
+    <header class="nav-bar" id="navBar">
+      <button class="nav-back" id="btnBack" style="visibility:hidden" aria-label="返回">←</button>
+      <h1 class="nav-title" id="navTitle">饭来</h1>
+      <span class="nav-action"></span>
+    </header>
+
+    <main class="page-container" id="pageContainer">
+
+      <!-- ===== 首页 ===== -->
+      <section class="page active" id="page-home">
+        <div class="floating-bubbles" aria-hidden="true">
+          <div class="float-bubble" style="--s:72px;--l:6%;--d:0s;--dr:18s;--dx:-22px;">🍅</div>
+          <div class="float-bubble" style="--s:60px;--l:20%;--d:5s;--dr:22s;--dx:18px;">🥚</div>
+          <div class="float-bubble" style="--s:78px;--l:35%;--d:2s;--dr:20s;--dx:-28px;">🧅</div>
+          <div class="float-bubble" style="--s:56px;--l:50%;--d:8s;--dr:24s;--dx:24px;">🥕</div>
+          <div class="float-bubble" style="--s:68px;--l:68%;--d:3s;--dr:19s;--dx:-18px;">🍄</div>
+          <div class="float-bubble" style="--s:62px;--l:82%;--d:7s;--dr:21s;--dx:20px;">🫑</div>
+          <div class="float-bubble" style="--s:54px;--l:90%;--d:11s;--dr:23s;--dx:-24px;">🥦</div>
+          <div class="float-bubble" style="--s:66px;--l:44%;--d:9s;--dr:17s;--dx:16px;">🧄</div>
+        </div>
+        <div class="hero-area">
+          <div class="hero-eyebrow">即时识别 · 智能推荐</div>
+          <div class="hero-visual">🥬</div>
+          <h2 class="hero-title">拍一拍，饭就来</h2>
+          <p class="hero-desc">拍张冰箱照，秒出菜谱推荐，再也不纠结今天吃什么</p>
+        </div>
+
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-preview hidden" id="previewContainer">
+            <img id="previewImage" alt="" style="display:none;">
+          </div>
+          <div class="upload-placeholder" id="uploadPlaceholder">
+            <div class="upload-ring">
+              <span class="upload-ring-icon">📸</span>
+            </div>
+            <span class="upload-text">拍照或选择照片</span>
+            <span class="upload-hint">支持冰箱、食材、采购照</span>
+          </div>
+          <input type="file" accept="image/*" capture="environment" id="fileInput" hidden>
+        </div>
+
+        <button class="btn btn-primary" id="btnAnalyze" disabled>识别食材</button>
+
+        <div class="demo-section">
+          <p class="demo-label">试试演示</p>
+          <div class="demo-cards">
+            <button class="demo-card" data-demo="fridge1">
+              <span class="demo-icon-wrap d1">🧊</span>
+              <span class="demo-text">
+                <span class="demo-name">鸡蛋、西红柿、青椒、五花肉</span>
+                <span class="demo-desc">家常食材组合</span>
+              </span>
+              <span class="demo-arrow">→</span>
+            </button>
+            <button class="demo-card" data-demo="fridge2">
+              <span class="demo-icon-wrap d2">🥬</span>
+              <span class="demo-text">
+                <span class="demo-name">鸡胸肉、西兰花、胡萝卜、土豆</span>
+                <span class="demo-desc">减脂高蛋白组合</span>
+              </span>
+              <span class="demo-arrow">→</span>
+            </button>
+            <button class="demo-card" data-demo="fridge3">
+              <span class="demo-icon-wrap d3">🛒</span>
+              <span class="demo-text">
+                <span class="demo-name">豆腐、牛肉、洋葱、青葱、姜</span>
+                <span class="demo-desc">下饭硬菜组合</span>
+              </span>
+              <span class="demo-arrow">→</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 识别结果 ===== -->
+      <section class="page" id="page-result">
+        <div class="loading-state hidden" id="loadingState">
+          <div class="loading-illustration">
+            <div class="loading-steam">
+              <span class="loading-steam-dot"></span>
+              <span class="loading-steam-dot"></span>
+              <span class="loading-steam-dot"></span>
+            </div>
+            <div class="loading-pot"></div>
+          </div>
+          <p class="loading-text">正在识别食材…</p>
+          <p class="loading-sub">分析搭配方案，生成推荐菜谱</p>
+        </div>
+
+        <div class="result-content hidden" id="resultContent">
+          <div class="card">
+            <div class="card-header">
+              <h3>已识别食材</h3>
+              <span class="badge" id="ingredientCount">6种</span>
+            </div>
+            <div class="ingredient-grid" id="ingredientGrid"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>偏好筛选</h3></div>
+            <div class="pref-tags" id="prefTags">
+              <button class="pref-tag active" data-pref="all">全部</button>
+              <button class="pref-tag" data-pref="quick">快手菜</button>
+              <button class="pref-tag" data-pref="lowfat">减脂轻食</button>
+              <button class="pref-tag" data-pref="soup">汤羹类</button>
+              <button class="pref-tag" data-pref="hearty">硬菜</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>推荐菜谱</h3></div>
+            <div class="recipe-list" id="recipeList"></div>
+          </div>
+
+          <button class="btn btn-primary" id="btnShoppingList">生成购物清单</button>
+        </div>
+      </section>
+
+      <!-- ===== 购物清单 ===== -->
+      <section class="page" id="page-shopping">
+        <div class="card">
+          <div class="card-header">
+            <h3>还缺这些食材</h3>
+            <span class="badge badge-warn" id="missingCount">3种</span>
+          </div>
+          <div class="shopping-list" id="shoppingList"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>已有食材</h3></div>
+          <div class="have-list" id="haveList"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>选中菜谱</h3></div>
+          <div class="selected-recipes" id="selectedRecipes"></div>
+        </div>
+
+        <div class="shop-actions">
+          <button class="btn btn-accent" id="btnGoBuy">一键跳转买菜</button>
+          <button class="btn btn-outline" id="btnBackHome">返回首页</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Tweaks -->
+    <button class="tweaks-toggle" id="tweaksToggle" aria-label="调整外观">⚙</button>
+    <div class="tweaks-panel" id="tweaksPanel">
+      <div class="tweaks-label">外观调整</div>
+      <div class="tweaks-row">
+        <span>强调色</span>
+        <div style="display:flex;gap:6px;">
+          <button class="tweak-btn active" data-theme="terracotta">陶土</button>
+          <button class="tweak-btn" data-theme="olive">橄榄</button>
+          <button class="tweak-btn" data-theme="plum">梅子</button>
+        </div>
+      </div>
+      <div class="tweaks-row">
+        <span>圆角</span>
+        <div style="display:flex;gap:6px;">
+          <button class="tweak-btn active" data-radius="round">圆润</button>
+          <button class="tweak-btn" data-radius="sharp">锐利</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="src/config.js"></script>
+  <script src="src/mockData.js"></script>
+  <script src="src/app-claude.js"></script>
+</body>
+</html>
